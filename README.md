@@ -8,6 +8,12 @@ A sophisticated URL-based tracking and fingerprinting system with bot detection,
 
 Stealth Fingerprinter (SF) is a web-based platform that enables users to create trackable URLs with intelligent visitor differentiation. The system automatically distinguishes between human visitors and automated bots, serving tailored responses while collecting comprehensive fingerprint data for analytics purposes.
 
+<br>
+
+<p align="center">
+	<img src="https://github.com/user-attachments/assets/1188a3de-63f3-4748-b295-78d4c5f7b91d">
+</p>
+
 ---
 
 ## Features
