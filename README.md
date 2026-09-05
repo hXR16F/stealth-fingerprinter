@@ -8,12 +8,6 @@ A sophisticated URL-based tracking and fingerprinting system with bot detection,
 
 Stealth Fingerprinter (SF) is a web-based platform that enables users to create trackable URLs with intelligent visitor differentiation. The system automatically distinguishes between human visitors and automated bots, serving tailored responses while collecting comprehensive fingerprint data for analytics purposes.
 
-<br>
-
-<p align="center">
-	<img src="https://github.com/user-attachments/assets/1188a3de-63f3-4748-b295-78d4c5f7b91d">
-</p>
-
 ---
 
 ## Features
@@ -84,7 +78,7 @@ Create multiple endpoints with identical behavior but different tracking aliases
 ### Prerequisites
 
 - Python 3.11 or higher
-- (Optional) Docker and Docker Compose
+- Docker (Optional)
 
 ### Local Installation
 
@@ -116,6 +110,8 @@ For production deployments, use Gunicorn, a production-grade WSGI HTTP server:
 gunicorn --bind 0.0.0.0:5000 app:app
 ```
 
+
+### Docker Installation
 
 ### Docker Installation
 
