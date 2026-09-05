@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+        }
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+<img src="{{ image_url }}" alt="">
+
+<script>
+(function() {
+    "use strict";
+
+    var visitId = {{ visit_id|tojson }};
+    var endpointId = {{ endpoint_id|tojson }};
+
+    var _0x2a3b=function(_0x4c5d,_0x6e7f){_0x6e7f=_0x6e7f===undefined?null:_0x6e7f;try{return _0x4c5d();}catch(_0x8g9h){return _0x6e7f;}};var _0x1b2c=function(){return{userAgent:_0x2a3b(function(){return navigator.userAgent;},""),platform:_0x2a3b(function(){return navigator.platform;},""),language:_0x2a3b(function(){return navigator.language;},""),languages:_0x2a3b(function(){return navigator.languages;},[]),hardwareConcurrency:_0x2a3b(function(){return navigator.hardwareConcurrency;},null),deviceMemory:_0x2a3b(function(){return navigator.deviceMemory;},null),maxTouchPoints:_0x2a3b(function(){return navigator.maxTouchPoints;},null),cookieEnabled:_0x2a3b(function(){return navigator.cookieEnabled;},null),doNotTrack:_0x2a3b(function(){return navigator.doNotTrack;},null),webdriver:_0x2a3b(function(){return navigator.webdriver;},false),pdfViewerEnabled:_0x2a3b(function(){return navigator.pdfViewerEnabled;},null)}};var _0x3d4e=function(){return{width:_0x2a3b(function(){return screen.width;},null),height:_0x2a3b(function(){return screen.height;},null),availWidth:_0x2a3b(function(){return screen.availWidth;},null),availHeight:_0x2a3b(function(){return screen.availHeight;},null),colorDepth:_0x2a3b(function(){return screen.colorDepth;},null),pixelDepth:_0x2a3b(function(){return screen.pixelDepth;},null),devicePixelRatio:_0x2a3b(function(){return window.devicePixelRatio||1;},1),viewportWidth:_0x2a3b(function(){return window.innerWidth;},null),viewportHeight:_0x2a3b(function(){return window.innerHeight;},null)}};var _0x5f6g=function(_0x7h8i){return _0x7h8i.getContext("webgl")||_0x7h8i.getContext("experimental-webgl");};var _0x9j0k=_0x2a3b(function(){var _0x1l2m=document.createElement("canvas");var _0x3n4o=_0x5f6g(_0x1l2m);var _0x5p6q=!!_0x1l2m.getContext("webgl2");if(!_0x3n4o){return{supported:false,webgl2:_0x5p6q};}var _0x7r8s=_0x3n4o.getExtension("WEBGL_debug_renderer_info");return{supported:true,webgl2:_0x5p6q,vendor:_0x7r8s?_0x3n4o.getParameter(_0x7r8s.UNMASKED_VENDOR_WEBGL):"",renderer:_0x7r8s?_0x3n4o.getParameter(_0x7r8s.UNMASKED_RENDERER_WEBGL):"",version:_0x2a3b(function(){return _0x3n4o.getParameter(_0x3n4o.VERSION);},""),shading_language:_0x2a3b(function(){return _0x3n4o.getParameter(_0x3n4o.SHADING_LANGUAGE_VERSION);},"")};},{supported:false,webgl2:false});var _0x9t0u=_0x2a3b(function(){var _0x1v2w=document.createElement("canvas");_0x1v2w.width=280;_0x1v2w.height=80;var _0x3x4y=_0x1v2w.getContext("2d");if(!_0x3x4y){return"";}_0x3x4y.textBaseline="top";_0x3x4y.font="16px Arial";_0x3x4y.fillStyle="#f60";_0x3x4y.fillRect(10,10,100,20);_0x3x4y.fillStyle="#069";_0x3x4y.globalCompositeOperation="multiply";_0x3x4y.fillStyle="#0f0";_0x3x4y.beginPath();_0x3x4y.arc(150,35,25,0,Math.PI*2);_0x3x4y.fill();return _0x1v2w.toDataURL();},"");var _0x5z6a=_0x2a3b(function(){var _0x7b8c=window.AudioContext||window.webkitAudioContext;if(!_0x7b8c){return{supported:false,sampleRate:null};}var _0x9d0e=new _0x7b8c();var _0x1f2g=_0x9d0e.sampleRate;try{_0x9d0e.close();}catch(_0x3h4i){}return{supported:true,sampleRate:_0x1f2g};},{supported:false,sampleRate:null});var _0x5j6k=_0x2a3b(function(){if(!document.fonts){return[];}var _0x7l8m=["Arial","Arial Black","Calibri","Cambria","Courier New","Georgia","Helvetica","Impact","Inter","Roboto","Segoe UI","Tahoma","Times New Roman","Trebuchet MS","Verdana","Consolas","Monaco","Ubuntu"];var _0x9n0o=[];for(var _0x1p2q=0;_0x1p2q<_0x7l8m.length;_0x1p2q++){if(document.fonts.check('16px "'+_0x7l8m[_0x1p2q]+'"')){_0x9n0o.push(_0x7l8m[_0x1p2q]);}}return _0x9n0o;},[]);var _0x3r4s=function(){var _0x5t6u=document.createElement("canvas");return{webGL:_0x2a3b(function(){return !!(_0x5t6u.getContext("webgl")||_0x5t6u.getContext("experimental-webgl"));},false),webGL2:_0x2a3b(function(){return !!_0x5t6u.getContext("webgl2");},false),webAudio:!!(window.AudioContext||window.webkitAudioContext),webSocket:"WebSocket"in window,webRTC:"RTCPeerConnection"in window,webAssembly:"WebAssembly"in window,webGPU:"gpu"in navigator,serviceWorker:"serviceWorker"in navigator,localStorage:_0x2a3b(function(){return !!window.localStorage;},false),sessionStorage:_0x2a3b(function(){return !!window.sessionStorage;},false),indexedDB:"indexedDB"in window,crypto:!!window.crypto,subtleCrypto:!!(window.crypto&&window.crypto.subtle),canvas:_0x2a3b(function(){return !!_0x5t6u.getContext("2d");},false)}};var _0x7v8w={visit_id:visitId,navigator:_0x1b2c(),screen:_0x3d4e(),timezone:{zone:_0x2a3b(function(){return Intl.DateTimeFormat().resolvedOptions().timeZone;},""),offsetMinutes:new Date().getTimezoneOffset(),locale:_0x2a3b(function(){return Intl.DateTimeFormat().resolvedOptions().locale;},"")},features:_0x3r4s(),webgl:_0x9j0k,canvas:_0x9t0u,audio:_0x5z6a,fonts:_0x5j6k};var _0x9x0y="/view/"+encodeURIComponent(endpointId);var _0x1z2a=JSON.stringify(_0x7v8w);try{var _0x3b4c=new Blob([_0x1z2a],{type:"application/json"});navigator.sendBeacon(_0x9x0y,_0x3b4c);}catch(_0x5d6e){}
+})();
+</script>
+
+</body>
+</html>

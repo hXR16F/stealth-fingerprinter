@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stealth Fingerprinter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="login-page">
+        <section class="card login-card">
+            <h2>Login</h2>
+            {% if error %}
+                <p class="login-error">{{ error }}</p>
+            {% endif %}
+            <form method="post">
+                <label for="license_key">License key</label>
+                <input id="license_key" name="license_key" type="password" placeholder="SF-..." autocomplete="off" autocapitalize="characters" spellcheck="false" required autofocus>
+                <button type="submit">Login</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

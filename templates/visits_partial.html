@@ -1,0 +1,224 @@
+<div class="stats" id="stats-container">
+    <div>
+        <b>{{ stats.total or 0 }}</b>
+        <span>Total visits</span>
+    </div>
+    <div>
+        <b>{{ stats.bots or 0 }}</b>
+        <span>Visits from bots</span>
+    </div>
+    <div>
+        <b>{{ stats.normal or 0 }}</b>
+        <span>Visits from real users</span>
+    </div>
+</div>
+
+<div id="visits-container">
+    <div class="visits-viewport">
+        <table class="visits-table">
+            <thead>
+                <tr>
+                    <th class="checkbox-col">
+                        <input type="checkbox" id="select-all">
+                    </th>
+                    <th>ID</th>
+                    <th>Time UTC</th>
+                    <th>Endpoint</th>
+                    <th>IP</th>
+                    <th>OS</th>
+                    <th>Browser</th>
+                    <th>Tracking</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="visits-body">
+            {% for v in visits %}
+                {% if v.is_bot %}
+                    <tr class="bot-row" data-bot-visit="true" data-visit-id="{{ v.id }}">
+                        <td class="checkbox-col">
+                            <input type="checkbox" class="visit-checkbox" data-visit-id="{{ v.id }}">
+                        </td>
+                        <td colspan="7">
+                            <span class="bot-label">Bot</span>
+                            visited
+                            <code>{{ v.endpoint_id }}</code>
+                            from
+                            <code>{{ v.ip_address or "unknown IP" }}</code>
+                            at
+                            <strong>
+                                {{ v.visited_at_utc|friendly_datetime }}
+                                {% if v.tracking_value %}
+                                    <span class="bot-query">
+                                        Tracking:
+                                        <code>{{ v.tracking_value }}</code>
+                                    </span>
+                                {% elif v.query_string %}
+                                    <span class="bot-query">
+                                        Query string:
+                                        <code>{{ v.query_string }}</code>
+                                    </span>
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td class="visit-actions">
+                            <button type="button" class="delete-visit-button" data-visit-id="{{ v.id }}">Delete</button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr class="visit-main-row" data-details="details-{{ v.id }}" data-visit-id="{{ v.id }}" aria-expanded="false">
+                        <td class="checkbox-col">
+                            <input type="checkbox" class="visit-checkbox" data-visit-id="{{ v.id }}">
+                        </td>
+                        <td>{{ v.id }}</td>
+                        <td>{{ v.visited_at_utc|friendly_datetime }}</td>
+                        <td><code>{{ v.endpoint_id }}</code></td>
+                        <td><code>{{ v.ip_address or "" }}</code></td>
+                        <td>{{ v.os or "—" }}</td>
+                        <td>
+                            {{ v.browser or "—" }}
+                            {% if v.browser_version %}{{ v.browser_version }}{% endif %}
+                        </td>
+                        <td class="trimmed-cell">
+                            {% if v.tracking_value %}
+                                <span class="trimmed-value" title="{{ v.query_string or '' }}">{{ v.tracking_value }}</span>
+                            {% elif v.query_string %}
+                                <span class="trimmed-value" title="{{ v.query_string }}">{{ v.query_string }}</span>
+                            {% else %}
+                                <span class="muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="visit-actions">
+                            <button type="button" class="delete-visit-button" data-visit-id="{{ v.id }}">Delete</button>
+                        </td>
+                    </tr>
+                    <tr id="details-{{ v.id }}" class="visit-details-row">
+                        <td colspan="9">
+                            <div class="visit-details">
+                                <h3>Request details</h3>
+                                <div class="details-grid">
+                                    <div>
+                                        <b>User-Agent</b>
+                                        <pre>{{ v.user_agent or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Accept</b>
+                                        <pre>{{ v.accept or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Accept-Language</b>
+                                        <pre>{{ v.accept_language or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Accept-Encoding</b>
+                                        <pre>{{ v.accept_encoding or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Host / Scheme</b>
+                                        <pre>{{ v.host or "—" }} / {{ v.scheme or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Method</b>
+                                        <pre>{{ v.method or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Path</b>
+                                        <pre>{{ v.path or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Tracking value</b>
+                                        <pre>{{ v.tracking_value or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Query string</b>
+                                        <pre>{{ v.query_string or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Remote port</b>
+                                        <pre>{{ v.remote_port or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Browser / OS / Device</b>
+                                        <pre>{{ v.browser or "—" }}{% if v.browser_version %} {{ v.browser_version }}{% endif %} / {{ v.os or "—" }} / {{ v.device or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>IP Address</b>
+                                        <div class="ip-lookup">
+                                            <pre>{{ v.ip_address or "—" }}</pre>
+                                            {% if v.ip_address %}
+                                                <a class="lookup-button" href="https://whatismyipaddress.com/ip/{{ v.ip_address }}" target="_blank" rel="noopener noreferrer">Lookup</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="full">
+                                        <b>All headers</b>
+                                        <pre>{{ v.headers_json or "—" }}</pre>
+                                    </div>
+                                </div>
+                                <h3>JS Fingerprinting</h3>
+                                <div class="details-grid fingerprint-details">
+                                    <div>
+                                        <b>Navigator</b>
+                                        <pre data-field="navigator_json">{{ v.navigator_json or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Screen</b>
+                                        <pre data-field="screen_json">{{ v.screen_json or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Timezone</b>
+                                        <pre data-field="timezone_json">{{ v.timezone_json or "—" }}</pre>
+                                    </div>
+                                    <div>
+                                        <b>Features</b>
+                                        <pre data-field="features_json">{{ v.features_json or "—" }}</pre>
+                                    </div>
+                                    <div class="full">
+                                        <b>WebGL details</b>
+                                        <pre data-field="webgl_json">{{ v.webgl_json or "—" }}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% else %}
+                <tr>
+                    <td colspan="9" class="empty-cell">No visits yet.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <nav class="pagination" aria-label="Recent visits pages" id="pagination">
+        {% if page > 1 %}
+            <a href="#" data-page="{{ page-1 }}" class="page-link">Previous</a>
+        {% else %}
+            <span class="disabled">Previous</span>
+        {% endif %}
+        <div class="page-numbers">
+            {% set start = [1, page - 2]|max %}
+            {% set end = [total_pages, page + 2]|min %}
+            {% if start > 1 %}
+                <a href="#" data-page="1" class="page-link">1</a>
+                <span>…</span>
+            {% endif %}
+            {% for p in range(start, end + 1) %}
+                {% if p == page %}
+                    <span class="current">{{ p }}</span>
+                {% else %}
+                    <a href="#" data-page="{{ p }}" class="page-link">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if end < total_pages %}
+                <span>…</span>
+                <a href="#" data-page="{{ total_pages }}" class="page-link">{{ total_pages }}</a>
+            {% endif %}
+        </div>
+        {% if page < total_pages %}
+            <a href="#" data-page="{{ page+1 }}" class="page-link">Next</a>
+        {% else %}
+            <span class="disabled">Next</span>
+        {% endif %}
+    </nav>
+    <div id="loading-indicator">Loading...</div>
+</div>

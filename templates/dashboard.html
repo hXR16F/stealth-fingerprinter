@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stealth Fingerprinter (SF)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>
+            Stealth Fingerprinter (SF)
+            <a href="https://github.com/hXR16F/stealth-fingerprinter" target="_blank" rel="noopener noreferrer" class="github-link" title="View on GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33s1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2"></path></svg>
+            </a>
+        </h1>
+    </div>
+    <div class="header-account">
+        <span>Logged in as <span class="blurred-nickname">{{ user.nickname }}</span></span>
+        <a href="{{ url_for('logout') }}">LOGOUT</a>
+    </div>
+</header>
+
+<main>
+
+<section class="stats">
+    <div><b>{{ stats.total or 0 }}</b><span>Total visits</span></div>
+    <div><b>{{ stats.bots or 0 }}</b><span>Visits from bots</span></div>
+    <div><b>{{ stats.normal or 0 }}</b><span>Visits from real users</span></div>
+</section>
+
+<section class="card">
+    <h2>Create endpoint</h2>
+    <form method="post" action="{{ url_for('create_endpoint') }}" enctype="multipart/form-data">
+        <div class="grid">
+            <div>
+                <h3>Bot visitor</h3>
+                <label for="bot_behavior">Behavior</label>
+                <select id="bot_behavior" name="bot_behavior" data-bot-behavior-select>
+                    <option value="meta">Custom meta tags</option>
+                    <option value="image">Display image</option>
+                    <option value="mimic" selected>Mimic website</option>
+                    <option value="redirect">Redirect</option>
+                    <option value="nothing">Do nothing</option>
+                </select>
+
+                <div data-bot-behavior-panel="image">
+                    <label for="bot_image_url">Image URL</label>
+                    <input id="bot_image_url" name="bot_image_url" type="url" placeholder="https://example.com/bot.png" data-bot-behavior-field>
+                    <label for="bot_image">or upload</label>
+                    <div class="file-input-wrap">
+                        <input id="bot_image" type="file" name="bot_image" accept="image/*" data-file-input="bot_image" data-bot-behavior-field>
+                        <button type="button" class="file-remove-button" data-file-remove="bot_image" hidden>Remove file</button>
+                    </div>
+                </div>
+
+                <div data-bot-behavior-panel="redirect" hidden>
+                    <label for="bot_redirect_url">Redirect URL</label>
+                    <input id="bot_redirect_url" name="bot_redirect_url" type="url" placeholder="https://example.com/" autocomplete="off" spellcheck="false" data-bot-behavior-field>
+                    <p class="card-sub form-help">Enter a URL to redirect bots. Leave this blank to redirect them to <code>about:blank</code>.</p>
+                </div>
+
+                <div data-bot-behavior-panel="meta" hidden>
+                    <label for="meta_tags">Meta tags (HTML)</label>
+                    <textarea id="meta_tags" name="meta_tags" placeholder="&lt;meta name=&quot;robots&quot; content=&quot;noindex&quot;&gt;" autocomplete="off" spellcheck="false" rows="5" maxlength="5000" data-bot-behavior-field></textarea>
+                    <p class="card-sub form-help">Enter valid HTML meta tags that will be rendered in the page for bots.</p>
+                </div>
+
+                <div data-bot-behavior-panel="mimic" hidden>
+                    <label for="bot_mimic_url">Source URL</label>
+                    <input id="bot_mimic_url" name="bot_mimic_url" type="url" placeholder="https://example.com/" autocomplete="off" spellcheck="false" data-bot-behavior-field>
+                    <p class="card-sub form-help">Enter a URL to fetch meta tags from. The system will extract all meta tags, title, and link tags from the target website and display them to bot visitors.</p>
+                </div>
+            </div>
+
+            <div>
+                <h3>Real visitor</h3>
+                <label for="behavior">Behavior</label>
+                <select id="behavior" name="behavior" data-behavior-select>
+                    <option value="image">Display image</option>
+                    <option value="redirect" selected>Redirect</option>
+                    <option value="alert">Show alert</option>
+                </select>
+
+                <div data-behavior-panel="image">
+                    <label for="image2_url">Image URL</label>
+                    <input id="image2_url" name="image2_url" type="url" placeholder="https://example.com/normal.png" data-behavior-field>
+                    <label for="image2">or upload</label>
+                    <div class="file-input-wrap">
+                        <input id="image2" type="file" name="image2" accept="image/*" data-file-input="image2" data-behavior-field>
+                        <button type="button" class="file-remove-button" data-file-remove="image2" hidden>Remove file</button>
+                    </div>
+                </div>
+
+                <div data-behavior-panel="redirect" hidden>
+                    <label for="redirect_url">Redirect URL</label>
+                    <input id="redirect_url" name="redirect_url" type="url" placeholder="https://example.com/" autocomplete="off" spellcheck="false" data-behavior-field>
+                    <p class="card-sub form-help">Enter a URL to redirect normal visitors. Leave this blank to redirect them to <code>about:blank</code>.</p>
+                </div>
+
+                <div data-behavior-panel="alert" hidden>
+                    <label for="alert_message">Alert message</label>
+                    <textarea id="alert_message" name="alert_message" placeholder="Something went wrong." autocomplete="off" spellcheck="false" rows="5" maxlength="5000" data-behavior-field></textarea>
+                    <p class="card-sub form-help">The visitor will see this JavaScript alert. After closing it, they will be sent to a blank page.</p>
+                </div>
+            </div>
+
+            <div class="full-width">
+                <h3>Tracking</h3>
+                <label for="tracking_aliases">Tracking aliases (comma separated)</label>
+                <input id="tracking_aliases" name="tracking_aliases" type="text" placeholder="friend1, friend2, friend3" autocomplete="off" spellcheck="false">
+                <p class="card-sub form-help">
+                    Enter tracking aliases separated by commas.<br>
+                    Example: <code>campaign1, friend, partner</code><br>
+                    Each alias generates a unique endpoint with the same behavior.<br>
+                    The dashboard displays the alias for easy identification.
+                </p>
+            </div>
+        </div>
+        <button type="submit">Create endpoints</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Obfuscation</h2>
+    <div class="obfuscation-grid">
+        <div>
+            <h3>URL obfuscation</h3>
+            <div class="checkbox-group">
+                <div class="obfuscation-section-header">
+                    <span class="label">Percent-hex escaped form</span>
+                </div>
+                <label class="checkbox-option">
+                    <input type="checkbox" name="obfuscation_types" value="hex_percent">
+                    <span>Hostname percent-hex escaping</span>
+                </label>
+                <label class="checkbox-option">
+                    <input type="checkbox" name="obfuscation_types" value="dot_percent">
+                    <span>Dot percent-hex escaping</span>
+                </label>
+                <div class="obfuscation-section-header">
+                    <span class="label">Homoglyphs</span>
+                    <span class="desc">(only works when copying as MARKDOWN and HTML)</span>
+                </div>
+                <label class="checkbox-option homoglyphs-label" for="use_homoglyphs">
+                    <input type="checkbox" id="use_homoglyphs" name="use_homoglyphs" value="1">
+                    <span>Homoglyphs in scheme</span>
+                </label>
+            </div>
+            <p class="card-sub form-help">
+                <strong>Hostname percent-hex escaping</strong> encodes characters in the hostname using percent-hex notation.<br>
+                <strong>Dot percent-hex escaping</strong> encodes the dots separating hostname labels as <code>%2e</code>.<br><br>
+                <strong>Homoglyphs in scheme</strong> replaces protocol characters with visually identical Unicode lookalikes to bypass automated security filters while looking legitimate to users.<br><br>
+                These techniques can help evade simple URL-based detection systems.
+            </p>
+        </div>
+
+        <div>
+            <h3>URL Spoofing</h3>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="direct" checked>
+                    <span>Direct URL</span>
+                </label>
+                <div class="obfuscation-section-header">
+                    <span class="label">Redirect-Based</span>
+                    <span class="desc">(redirection notice)</span>
+                </div>
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="google_q">
+                    <span><code>https://www.google.com/url?q=</code></span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="google_no_www">
+                    <span><code>https://google.com/url?q=</code></span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="facebook_l">
+                    <span><code>https://facebook.com/l.php?u=</code></span>
+                </label>
+                <div class="obfuscation-section-header" style="margin-top: 16px;">
+                    <span class="label">Userinfo-Based</span>
+                </div>
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="auth_google">
+                    <span><code>https://accounts.google.com+signin=secure+v2+identifier=passive@</code></span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="auth_facebook">
+                    <span><code>https://facebook.com+login=secure+settings=private@</code></span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="auth_instagram">
+                    <span><code>https://instagram.com+accounts=login+settings=private@</code></span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="auth_linkedin">
+                    <span><code>https://linkedin.com+accounts=securelogin+settings=private@</code></span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="obfuscation_method" value="auth_github">
+                    <span><code>https://github.com+login=secure+settings=private@</code></span>
+                </label>
+            </div>
+            <p class="card-sub form-help">
+                <strong>Redirect–Based</strong> wraps your URL in a known redirector to mask the final destination.<br>
+                <strong>Userinfo-Based</strong> abuses the userinfo component of a URL to make a destination appear associated with a trusted domain.
+            </p>
+        </div>
+    </div>
+    <p class="card-sub form-help">When you click <code>Copy URL</code>, the endpoint URL is automatically obfuscated according to your selected setting.</p>
+</section>
+
+<section class="card">
+    <h2>Endpoints</h2>
+    <div class="table-wrap endpoints-wrap">
+        <table class="endpoints-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Created</th>
+                    <th>Endpoint</th>
+                    <th>Full endpoint URL</th>
+                    <th>Visits</th>
+                    <th>Tracking</th>
+                    <th>Bot behavior</th>
+                    <th>User behavior</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for endpoint_id, e in endpoints.items() %}
+                {% set s = endpoint_stats.get(endpoint_id, {"bot_clicks": 0, "user_clicks": 0}) %}
+                {% set behavior = e.get("behavior", "image") %}
+                {% set bot_behavior = e.get("bot_behavior", "image") %}
+                <tr>
+                    <td class="endpoint-number">{{ e.id }}</td>
+                    <td class="endpoint-created">{{ e.created_at|friendly_datetime }}</td>
+                    <td class="endpoint-token"><code>{{ endpoint_id }}</code></td>
+                    <td class="endpoint-cell">
+                        <div class="endpoint-url-wrap">
+                            <code id="url-{{ endpoint_id }}">{{ endpoint_urls[endpoint_id] }}</code>
+                        </div>
+                    </td>
+                    <td class="click-count">Bots: {{ s.bot_clicks }}<br>Users: {{ s.user_clicks }}</td>
+                    <td class="endpoint-query">
+                        {% if e.get("tracking_alias") %}
+                            <code>{{ e.tracking_alias }}</code>
+                        {% else %}
+                            <span class="muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="endpoint-cell behavior-cell">
+                        {% if bot_behavior == "image" %}
+                            <strong>Image</strong>
+                            {% if e.bot_image %}
+                                <br><code class="behavior-value" title="{{ e.bot_image }}">{{ e.bot_image }}</code>
+                            {% endif %}
+                        {% elif bot_behavior == "redirect" %}
+                            <strong>Redirect</strong>
+                            {% if e.bot_redirect_url %}
+                                <br><code class="behavior-value" title="{{ e.bot_redirect_url }}">{{ e.bot_redirect_url }}</code>
+                            {% else %}
+                                <br><span class="muted">about:blank</span>
+                            {% endif %}
+                        {% elif bot_behavior == "meta" %}
+                            <strong>Meta tags</strong>
+                            {% if e.bot_meta_tags %}
+                                <br><span class="raw behavior-value" title="{{ e.bot_meta_tags }}">{{ e.bot_meta_tags }}</span>
+                            {% endif %}
+                        {% elif bot_behavior == "mimic" %}
+                            <strong>Mimic website</strong>
+                            {% if e.bot_mimic_url %}
+                                <br><code class="behavior-value" title="{{ e.bot_mimic_url }}">{{ e.bot_mimic_url }}</code>
+                                <br><span class="muted">{{ e.bot_mimic_meta_tags|length // 100 or 0 }} tags fetched</span>
+                            {% endif %}
+                        {% else %}
+                            <strong>Do nothing</strong>
+                            <br><span class="muted">Shows normal behavior</span>
+                        {% endif %}
+                    </td>
+                    <td class="endpoint-cell behavior-cell">
+                        {% if behavior == "redirect" %}
+                            <strong>Redirect</strong>
+                            {% if e.redirect_url %}
+                                <br><code class="behavior-value" title="{{ e.redirect_url }}">{{ e.redirect_url }}</code>
+                            {% else %}
+                                <br><span class="muted">about:blank</span>
+                            {% endif %}
+                        {% elif behavior == "alert" %}
+                            <strong>Alert</strong>
+                            {% if e.alert_message %}
+                                <br><span class="raw behavior-value" title="{{ e.alert_message }}">{{ e.alert_message }}</span>
+                            {% endif %}
+                        {% else %}
+                            <strong>Image</strong>
+                            {% if e.image_normal %}
+                                <br><code class="behavior-value" title="{{ e.image_normal }}">{{ e.image_normal }}</code>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td class="endpoint-actions">
+                        <button type="button" class="copy-button" data-copy-target="url-{{ endpoint_id }}" data-endpoint-id="{{ endpoint_id }}">Copy URL</button>
+                        <button type="button" class="copy-as-button" data-copy-as-target="url-{{ endpoint_id }}" data-endpoint-id="{{ endpoint_id }}">Copy As</button>
+                        <button type="button" class="delete-button" data-endpoint-id="{{ endpoint_id }}" data-delete-endpoint>Remove</button>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="9" class="empty-cell">No endpoints yet.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card">
+    <div class="visits-heading"><h2>Visits</h2></div>
+    <div class="visits-controls">
+        <div class="visits-controls-left">
+            <button type="button" class="refresh-button" id="refresh-button" title="Refresh data"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" fill-rule="evenodd" d="M298.667 213.333v-42.666l79.898-.003c-26.986-38.686-71.82-63.997-122.565-63.997c-82.475 0-149.333 66.858-149.333 149.333S173.525 405.333 256 405.333c76.201 0 139.072-57.074 148.195-130.807l42.342 5.292C434.807 374.618 353.974 448 256 448c-106.039 0-192-85.961-192-192S149.961 64 256 64c60.316 0 114.136 27.813 149.335 71.313L405.333 64H448v149.333z"></path></svg></button>
+            <div class="filter-group">
+                <input type="text" id="regex_filter" name="regex_filter" placeholder="Filter by regex..." value="{{ regex_filter or '' }}" class="filter-input">
+                <button type="button" class="filter-button" id="filter-button">Filter</button>
+                {% if regex_filter %}
+                    <a href="#" class="filter-clear" id="filter-clear">Clear</a>
+                {% endif %}
+            </div>
+            <button type="button" class="delete-multi-button" id="delete-multi" disabled>Delete Selected</button>
+        </div>
+        <div class="visits-controls-right">
+            <label class="checkbox-control" for="hide_bots">
+                <input id="hide_bots" name="hide_bots" type="checkbox" value="1" {% if request.args.get('hide_bots') == '1' %}checked{% endif %}>
+                <span>Hide bots</span>
+            </label>
+            <div class="per-page-group">
+                <label for="per_page">Show</label>
+                <select id="per_page" name="per_page">
+                    {% for n in [10,20,50,100,200,500,1000] %}
+                        <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+                    {% endfor %}
+                </select>
+                <span>results</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="visits-viewport">
+        <table class="visits-table">
+            <thead>
+                <tr>
+                    <th class="checkbox-col"><input type="checkbox" id="select-all"></th>
+                    <th>ID</th>
+                    <th>Time UTC</th>
+                    <th>Endpoint</th>
+                    <th>IP</th>
+                    <th>OS</th>
+                    <th>Browser</th>
+                    <th>Tracking</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for v in visits %}
+                {% if v.is_bot %}
+                    <tr class="bot-row" data-bot-visit="true" data-visit-id="{{ v.id }}">
+                        <td class="checkbox-col"><input type="checkbox" class="visit-checkbox" data-visit-id="{{ v.id }}"></td>
+                        <td colspan="7">
+                            {% if v.bot_category %}
+                                <span class="bot-label">Bot — {{ v.bot_category }}</span>
+                            {% else %}
+                                <span class="bot-label">Bot</span>
+                            {% endif %}
+                            visited <code>{{ v.endpoint_id }}</code> from <code>{{ v.ip_address or "unknown IP" }}</code> at {{ v.visited_at_utc|friendly_datetime }}
+                            {% if v.tracking_alias %}
+                                <span class="bot-query">Tracking: <code>{{ v.tracking_alias }}</code></span>
+                            {% elif v.query_string %}
+                                <span class="bot-query">Query string: <code>{{ v.query_string }}</code></span>
+                            {% endif %}
+                        </td>
+                        <td class="visit-actions">
+                            <button type="button" class="delete-visit-button" data-visit-id="{{ v.id }}">Delete</button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr class="visit-main-row" data-details="details-{{ v.id }}" data-visit-id="{{ v.id }}" aria-expanded="false">
+                        <td class="checkbox-col"><input type="checkbox" class="visit-checkbox" data-visit-id="{{ v.id }}"></td>
+                        <td>{{ v.id }}</td>
+                        <td>{{ v.visited_at_utc|friendly_datetime }}</td>
+                        <td><code>{{ v.endpoint_id }}</code></td>
+                        <td><code>{{ v.ip_address or "" }}</code></td>
+                        <td>{{ v.os or "—" }}</td>
+                        <td>{{ v.browser or "—" }}{% if v.browser_version %} {{ v.browser_version }}{% endif %}</td>
+                        <td class="trimmed-cell">
+                            {% if v.tracking_alias %}
+                                <span class="trimmed-value" title="{{ v.tracking_alias }}">{{ v.tracking_alias }}</span>
+                            {% elif v.query_string %}
+                                <span class="trimmed-value" title="{{ v.query_string }}">{{ v.query_string }}</span>
+                            {% else %}
+                                <span class="muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="visit-actions">
+                            <button type="button" class="delete-visit-button" data-visit-id="{{ v.id }}">Delete</button>
+                        </td>
+                    </tr>
+                    <tr id="details-{{ v.id }}" class="visit-details-row">
+                        <td colspan="9">
+                            <div class="visit-details">
+                                <h3>Request details</h3>
+                                <div class="details-grid">
+                                    <div><b>User-Agent</b><pre>{{ v.user_agent or "—" }}</pre></div>
+                                    <div><b>Accept</b><pre>{{ v.accept or "—" }}</pre></div>
+                                    <div><b>Accept-Language</b><pre>{{ v.accept_language or "—" }}</pre></div>
+                                    <div><b>Accept-Encoding</b><pre>{{ v.accept_encoding or "—" }}</pre></div>
+                                    <div><b>Host / Scheme</b><pre>{{ v.host or "—" }} / {{ v.scheme or "—" }}</pre></div>
+                                    <div><b>Method</b><pre>{{ v.method or "—" }}</pre></div>
+                                    <div><b>Path</b><pre>{{ v.path or "—" }}</pre></div>
+                                    <div><b>Tracking value</b><pre>{{ v.tracking_alias or "—" }}</pre></div>
+                                    <div><b>Query string</b><pre>{{ v.query_string or "—" }}</pre></div>
+                                    <div><b>Remote port</b><pre>{{ v.remote_port or "—" }}</pre></div>
+                                    <div><b>Browser / OS / Device</b><pre>{{ v.browser or "—" }}{% if v.browser_version %} {{ v.browser_version }}{% endif %} / {{ v.os or "—" }} / {{ v.device or "—" }}</pre></div>
+                                    <div>
+                                        <b>IP Address</b>
+                                        <div class="ip-lookup">
+                                            <pre>{{ v.ip_address or "—" }}</pre>
+                                            {% if v.ip_address %}
+                                                <a class="lookup-button" href="https://whatismyipaddress.com/ip/{{ v.ip_address }}" target="_blank" rel="noopener noreferrer">Lookup</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="full"><b>All headers</b><pre>{{ v.headers_json or "—" }}</pre></div>
+                                </div>
+                                <h3>JS Fingerprinting</h3>
+                                <div class="details-grid fingerprint-details">
+                                    <div><b>Navigator</b><pre data-field="navigator_json">{{ v.navigator_json or "—" }}</pre></div>
+                                    <div><b>Screen</b><pre data-field="screen_json">{{ v.screen_json or "—" }}</pre></div>
+                                    <div><b>Timezone</b><pre data-field="timezone_json">{{ v.timezone_json or "—" }}</pre></div>
+                                    <div><b>Features</b><pre data-field="features_json">{{ v.features_json or "—" }}</pre></div>
+                                    <div class="full"><b>WebGL details</b><pre data-field="webgl_json">{{ v.webgl_json or "—" }}</pre></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% else %}
+                <tr><td colspan="9" class="empty-cell">No visits yet.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <nav class="pagination" aria-label="Recent visits pages">
+        {% if page > 1 %}
+            <a href="{{ url_for('dashboard', page=page-1, per_page=per_page, hide_bots=request.args.get('hide_bots'), regex_filter=regex_filter) }}">Previous</a>
+        {% else %}
+            <span class="disabled">Previous</span>
+        {% endif %}
+
+        <div class="page-numbers">
+            {% set start = [1, page - 2]|max %}
+            {% set end = [total_pages, page + 2]|min %}
+            {% if start > 1 %}
+                <a href="{{ url_for('dashboard', page=1, per_page=per_page, hide_bots=request.args.get('hide_bots'), regex_filter=regex_filter) }}">1</a>
+                <span>…</span>
+            {% endif %}
+            {% for p in range(start, end + 1) %}
+                {% if p == page %}
+                    <span class="current">{{ p }}</span>
+                {% else %}
+                    <a href="{{ url_for('dashboard', page=p, per_page=per_page, hide_bots=request.args.get('hide_bots'), regex_filter=regex_filter) }}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if end < total_pages %}
+                <span>…</span>
+                <a href="{{ url_for('dashboard', page=total_pages, per_page=per_page, hide_bots=request.args.get('hide_bots'), regex_filter=regex_filter) }}">{{ total_pages }}</a>
+            {% endif %}
+        </div>
+
+        {% if page < total_pages %}
+            <a href="{{ url_for('dashboard', page=page+1, per_page=per_page, hide_bots=request.args.get('hide_bots'), regex_filter=regex_filter) }}">Next</a>
+        {% else %}
+            <span class="disabled">Next</span>
+        {% endif %}
+    </nav>
+</section>
+
+</main>
+
+<div class="copy-as-overlay" id="copyAsOverlay">
+    <div class="copy-as-modal">
+        <div class="copy-as-header">
+            <h2>Copy URL As</h2>
+            <button type="button" class="copy-as-close" id="copyAsClose">
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M6.4 19L5 17.6l5.6-5.6L5 6.4L6.4 5l5.6 5.6L17.6 5L19 6.4L13.4 12l5.6 5.6l-1.4 1.4l-5.6-5.6z"/></svg>
+            </button>
+        </div>
+        <div class="copy-as-body">
+            <div class="copy-as-options">
+                <button type="button" class="copy-as-option" data-copy-format="raw">Raw link</button>
+                <button type="button" class="copy-as-option" data-copy-format="markdown">Markdown</button>
+                <button type="button" class="copy-as-option" data-copy-format="html">HTML</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+</body>
+</html>
