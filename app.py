@@ -47,7 +47,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__)
-app.secret_key = os.environ["SECRET_KEY"]
+app.secret_key = os.environ.get("SECRET_KEY", "sf-change-me")
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
