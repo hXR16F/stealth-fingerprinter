@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Stealth Fingerprinter (SF)</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        window.APP_BASE_PATH = {{ request.script_root|tojson }};
+    </script>
 </head>
 <body>
 

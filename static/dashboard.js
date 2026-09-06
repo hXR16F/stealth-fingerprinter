@@ -1,6 +1,8 @@
 (function() {
     "use strict";
 
+    const BASE_PATH = window.APP_BASE_PATH || "";
+
     function copyText(value) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             return navigator.clipboard.writeText(value);
@@ -427,7 +429,7 @@
                 var endpointId = button.dataset.endpointId;
                 if (!endpointId) return;
                 if (!confirm("Remove this endpoint?")) return;
-                fetch("/delete/" + endpointId, {
+                fetch(BASE_PATH + "/delete/" + endpointId, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ delete_visits: false })
@@ -452,7 +454,7 @@
                 var visitId = button.dataset.visitId;
                 if (!visitId) return;
                 if (!confirm("Delete this visit?")) return;
-                fetch("/delete_visit/" + visitId, {
+                fetch(BASE_PATH + "/delete_visit/" + visitId, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" }
                 }).then(function(response) {
@@ -504,7 +506,7 @@
             checked.forEach(function(cb) {
                 visitIds.push(cb.dataset.visitId);
             });
-            fetch("/delete_visits", {
+            fetch(BASE_PATH + "/delete_visits", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ visit_ids: visitIds })

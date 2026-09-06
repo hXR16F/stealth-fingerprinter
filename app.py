@@ -33,6 +33,7 @@ from flask import (
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 load_dotenv()
 
@@ -48,11 +49,24 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "sf-change-me")
+
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax"
 )
+
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,
+    x_proto=1,
+    x_host=1,
+    x_prefix=1,
+)
+
+@app.context_processor
+def inject_script_root():
+    return dict(script_root=request.script_root)
 
 limiter = Limiter(
     app=app,
