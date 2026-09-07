@@ -22,6 +22,18 @@
         return Promise.resolve();
     }
 
+    document.getElementById("copy-head").addEventListener("click", function () {
+        var originalText = this.textContent;
+
+        copyText(originalText).then(() => {
+            this.textContent = "COPIED";
+
+            setTimeout(() => {
+                this.textContent = originalText;
+            }, 800);
+        });
+    });
+
     function percentHexEncode(str) {
         var result = '';
         for (var i = 0; i < str.length; i++) {

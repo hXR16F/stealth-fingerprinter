@@ -370,6 +370,12 @@ textarea {
   resize: vertical;
 }
 
+#copy-head {
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 button {
   min-height: 40px;
   padding: 0 18px;

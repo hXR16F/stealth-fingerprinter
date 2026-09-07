@@ -52,8 +52,9 @@ app.secret_key = os.environ.get("SECRET_KEY", "sf-change-me")
 
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 app.config.update(
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax"
+    SESSION_COOKIE_HTTPONLY = True,
+    SESSION_COOKIE_SAMESITE = "Lax",
+    MAX_FORM_MEMORY_SIZE = 100 * 1024 * 1024
 )
 
 app.wsgi_app = ProxyFix(
@@ -655,6 +656,33 @@ def parse_ua(ua: str) -> dict:
     }
 
 
+def parse_meta_tags_from_html(html_content: str) -> tuple[str, int]:
+    if not html_content:
+        return "", 0
+
+    meta_tags = []
+
+    meta_pattern = re.compile(r'<meta[^>]*>', re.IGNORECASE | re.DOTALL)
+    meta_tags.extend(meta_pattern.findall(html_content))
+
+    title_pattern = re.compile(r'<title[^>]*>.*?</title>', re.IGNORECASE | re.DOTALL)
+    meta_tags.extend(title_pattern.findall(html_content))
+
+    link_pattern = re.compile(
+        r'<link[^>]*rel=["\']([^"\']*)["\'][^>]*>',
+        re.IGNORECASE | re.DOTALL,
+    )
+    for match in link_pattern.finditer(html_content):
+        meta_tags.append(match.group(0))
+
+    meta_tags = list(dict.fromkeys(meta_tags))
+
+    if len(meta_tags) > 100:
+        meta_tags = meta_tags[:100]
+
+    return "\n".join(meta_tags) if meta_tags else "", len(meta_tags)
+
+
 def log_visit(endpoint_id: str, route: str) -> int:
     ua = request.headers.get("User-Agent", "")
     is_bot = bool(BOT_UA_RE.search(ua))
@@ -778,7 +806,7 @@ def resolve_image(source: str):
         response = requests.get(
             source,
             timeout=8,
-            headers={"User-Agent": "ImageFingerprinter/1.0"},
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
         )
         response.raise_for_status()
     except requests.RequestException:
@@ -1163,57 +1191,39 @@ def create_endpoint():
 
         bot_mimic_url = ""
         bot_mimic_meta_tags = ""
+        bot_mimic_meta_count = 0
+        bot_mimic_html = ""
         if bot_behavior == "mimic":
             bot_mimic_url = request.form.get("bot_mimic_url", "").strip()
+            bot_mimic_html = request.form.get("bot_mimic_html", "").strip()
 
-            if not bot_mimic_url:
-                raise ValueError("Target URL is required for 'Mimic website' behavior.")
+            if bot_mimic_html:
+                bot_mimic_meta_tags, bot_mimic_meta_count = parse_meta_tags_from_html(bot_mimic_html)
+                if not bot_mimic_meta_tags:
+                    raise ValueError("No meta tags found in the provided HTML source.")
+            elif bot_mimic_url:
+                if not validate_http_url(bot_mimic_url):
+                    raise ValueError("Invalid target URL for 'Mimic website'.")
 
-            if not validate_http_url(bot_mimic_url):
-                raise ValueError("Invalid target URL for 'Mimic website'.")
-
-            try:
-                response = requests.get(
-                    bot_mimic_url,
-                    timeout=30,
-                    headers={
-                        "User-Agent": (
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                            "AppleWebKit/537.36 (KHTML, like Gecko) "
-                            "Chrome/120.0.0.0 Safari/537.36"
-                        )
-                    },
-                    allow_redirects=True,
-                )
-                response.raise_for_status()
-
-                html_content = response.text
-                meta_tags = []
-
-                meta_pattern = re.compile(r'<meta[^>]*>', re.IGNORECASE | re.DOTALL)
-                meta_tags.extend(meta_pattern.findall(html_content))
-
-                title_pattern = re.compile(r'<title[^>]*>.*?</title>', re.IGNORECASE | re.DOTALL)
-                meta_tags.extend(title_pattern.findall(html_content))
-
-                link_pattern = re.compile(
-                    r'<link[^>]*rel=["\']([^"\']*)["\'][^>]*>',
-                    re.IGNORECASE | re.DOTALL,
-                )
-                for match in link_pattern.finditer(html_content):
-                    meta_tags.append(match.group(0))
-
-                meta_tags = list(dict.fromkeys(meta_tags))
-
-                if len(meta_tags) > 100:
-                    meta_tags = meta_tags[:100]
-
-                bot_mimic_meta_tags = "\n".join(meta_tags) if meta_tags else ""
-
-            except requests.exceptions.RequestException as e:
-                raise ValueError(f"Failed to fetch page: {str(e)}")
-            except Exception as e:
-                raise ValueError(f"Error processing page: {str(e)}")
+                try:
+                    response = requests.get(
+                        bot_mimic_url,
+                        timeout=20,
+                        headers={
+                            "User-Agent": (
+                                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                            )
+                        },
+                        allow_redirects=True,
+                    )
+                    response.raise_for_status()
+                    bot_mimic_meta_tags, bot_mimic_meta_count = parse_meta_tags_from_html(response.text)
+                except requests.exceptions.RequestException as e:
+                    raise ValueError(f"Failed to fetch page: {str(e)}")
+                except Exception as e:
+                    raise ValueError(f"Error processing page: {str(e)}")
+            else:
+                raise ValueError("Either URL or HTML source is required for 'Mimic website'.")
 
         normal_image = ""
         if behavior == "image":
@@ -1289,7 +1299,9 @@ def create_endpoint():
                 "bot_meta_tags": bot_meta_tags,
                 "bot_redirect_url": bot_redirect_url,
                 "bot_mimic_url": bot_mimic_url,
+                "bot_mimic_html": bot_mimic_html,
                 "bot_mimic_meta_tags": bot_mimic_meta_tags,
+                "bot_mimic_meta_count": bot_mimic_meta_count,
                 "image_normal": normal_image,
                 "behavior": behavior,
                 "redirect_url": redirect_url,

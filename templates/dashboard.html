@@ -74,7 +74,9 @@
                 <div data-bot-behavior-panel="mimic" hidden>
                     <label for="bot_mimic_url">Source URL</label>
                     <input id="bot_mimic_url" name="bot_mimic_url" type="url" placeholder="https://example.com/" autocomplete="off" spellcheck="false" data-bot-behavior-field>
-                    <p class="card-sub form-help">Enter a URL to fetch meta tags from. The system will extract all meta tags, title, and link tags from the target website and display them to bot visitors.</p>
+                    <label for="bot_mimic_html">Or Paste HTML source</label>
+                    <textarea id="bot_mimic_html" name="bot_mimic_html" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html&gt;&#10;&lt;head&gt;&#10;  &lt;title&gt;Example&lt;/title&gt;&#10;  &lt;meta name=&quot;robots&quot; content=&quot;noindex&quot;&gt;&#10;&lt;/head&gt;&#10;&lt;/html&gt;" autocomplete="off" spellcheck="false" rows="7" maxlength="500000" data-bot-behavior-field></textarea>
+                    <p class="card-sub form-help">Enter a URL or paste full <code>&lt;head&gt;</code> section of a page to fetch meta tags from. The system will extract all meta tags, title, and link tags from the target website and display them to bot visitors.<br><br>To copy a page's <code>&lt;head&gt;</code> section, open DevTools and run <code id="copy-head">copy(document.head.outerHTML)</code> in the console.</p>
                 </div>
             </div>
 
@@ -277,7 +279,13 @@
                             <strong>Mimic website</strong>
                             {% if e.bot_mimic_url %}
                                 <br><code class="behavior-value" title="{{ e.bot_mimic_url }}">{{ e.bot_mimic_url }}</code>
-                                <br><span class="muted">{{ e.bot_mimic_meta_tags|length // 100 or 0 }} tags fetched</span>
+                            {% endif %}
+                            {% if e.bot_mimic_meta_count is defined and e.bot_mimic_meta_count > 0 %}
+                                <br><span class="muted">{{ e.bot_mimic_meta_count }} meta tags fetched</span>
+                            {% elif e.bot_mimic_meta_tags %}
+                                <br><span class="muted">{{ e.bot_mimic_meta_tags.count('<') }} meta tags fetched</span>
+                            {% else %}
+                                <br><span class="muted">0 tags fetched</span>
                             {% endif %}
                         {% else %}
                             <strong>Do nothing</strong>
